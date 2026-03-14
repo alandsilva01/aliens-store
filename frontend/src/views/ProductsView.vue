@@ -75,6 +75,7 @@
           :product="product"
           :style="{ animationDelay: `${i * 60}ms` }"
           class="alien-card-enter"
+          @view="openDetail(product)"
           @edit="openForm(product)"
           @toggle="handleToggle(product)"
         />
@@ -94,7 +95,15 @@
       </div>
     </main>
 
-    <!-- Modal -->
+    <!-- Detail Modal -->
+    <ProductDetailModal
+      v-if="showDetail"
+      :product="detailProduct"
+      @close="showDetail = false"
+      @edit="p => { showDetail = false; openForm(p) }"
+    />
+
+    <!-- Form Modal -->
     <ProductFormModal
       v-if="showModal"
       :product="editingProduct"
@@ -111,6 +120,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useProductStore } from '@/stores/products'
 import { useRouter } from 'vue-router'
 import ProductCard from '@/components/product/ProductCard.vue'
+import ProductDetailModal from '@/components/product/ProductDetailModal.vue'
 import ProductFormModal from '@/components/product/ProductFormModal.vue'
 
 const toast          = useToast()
@@ -119,6 +129,8 @@ const store          = useProductStore()
 const router         = useRouter()
 const showModal      = ref(false)
 const editingProduct = ref(null)
+const showDetail     = ref(false)
+const detailProduct  = ref(null)
 const search         = ref('')
 const filterCategory = ref('')
 const filterActive   = ref('')
@@ -145,6 +157,11 @@ function debouncedFetch() {
 function goToPage(page) {
   fetchProducts(page)
   window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function openDetail(product) {
+  detailProduct.value = product
+  showDetail.value    = true
 }
 
 function openForm(product = null) {

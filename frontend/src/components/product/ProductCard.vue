@@ -3,6 +3,7 @@
     class="card-alien flex flex-col group cursor-pointer transition-all duration-300 hover:border-alien-green"
     style="transition: box-shadow 0.3s, border-color 0.3s;"
     :style="{ boxShadow: hovered ? '0 0 20px rgba(0,255,136,0.15)' : 'none' }"
+    @click="$emit('view', product)"
     @mouseenter="hovered = true"
     @mouseleave="hovered = false"
   >
@@ -92,7 +93,7 @@
 import { ref, computed } from 'vue'
 
 const props = defineProps({ product: { type: Object, required: true } })
-defineEmits(['edit', 'toggle'])
+defineEmits(['edit', 'toggle', 'view'])
 
 const hovered = ref(false)
 
