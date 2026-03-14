@@ -36,9 +36,13 @@ export const useProductStore = defineStore('products', () => {
   }
 
   async function updateProduct(id, formData) {
-    formData.append('_method', 'PUT')
+    // Laravel 11 nao suporta _method em multipart
+    // Enviamos como POST com X-HTTP-Method-Override header
     const { data } = await api.post(`/products/${id}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'X-HTTP-Method-Override': 'PUT',
+      },
     })
     return data
   }

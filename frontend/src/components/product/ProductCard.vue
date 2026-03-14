@@ -12,12 +12,13 @@
 
     <!-- Image -->
     <div class="relative h-44 bg-alien-bg overflow-hidden">
-      <img
-        v-if="product.images && product.images.length"
-        :src="product.images[0].url"
-        :alt="product.title"
-        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-      />
+     <img
+  v-if="product.images && product.images.length"
+  :src="product.images[0].url"
+  :alt="product.title"
+  class="w-full h-full object-cover object-position-top transition-transform duration-700 group-hover:scale-110"
+  style="object-position: top !important"
+/>
       <div v-else class="w-full h-full flex items-center justify-center">
         <span class="text-6xl opacity-30">👽</span>
       </div>
