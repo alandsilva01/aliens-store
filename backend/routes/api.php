@@ -19,3 +19,11 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::delete("/products/{product}", [ProductController::class, "destroy"]);
     Route::delete("/products/{product}/images/{image}", [ProductController::class, "removeImage"]);
 });
+
+// Users CRUD
+Route::middleware("auth:sanctum")->group(function () {
+    Route::get("/users",         [App\Http\Controllers\UserController::class, "index"]);
+    Route::post("/users",        [App\Http\Controllers\UserController::class, "store"]);
+    Route::put("/users/{user}",  [App\Http\Controllers\UserController::class, "update"]);
+    Route::delete("/users/{user}", [App\Http\Controllers\UserController::class, "destroy"]);
+});
