@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    @apply bg-alien-bg text-alien-text font-rajdhani antialiased;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(123,47,255,0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(0,255,136,0.05) 0%, transparent 50%);
+  }
+}
+
+@layer components {
+  .btn-alien {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded font-rajdhani font-semibold text-sm
+           border border-alien-green text-alien-green bg-transparent
+           hover:bg-alien-green hover:text-alien-bg
+           transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed
+           tracking-widest uppercase;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded font-rajdhani font-semibold text-sm
+           border border-alien-muted text-alien-muted bg-transparent
+           hover:border-alien-blue hover:text-alien-blue
+           transition-all duration-300 tracking-widest uppercase;
+  }
+  .btn-danger {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded font-rajdhani font-semibold text-sm
+           border border-red-500 text-red-500 bg-transparent
+           hover:bg-red-500 hover:text-white
+           transition-all duration-300 tracking-widest uppercase;
+  }
+  .input-alien {
+    @apply w-full bg-alien-card border border-alien-border text-alien-text rounded px-3 py-2
+           text-sm font-rajdhani placeholder-alien-muted
+           focus:outline-none focus:border-alien-green focus:ring-1 focus:ring-alien-green
+           transition-all duration-200;
+  }
+  .card-alien {
+    @apply bg-alien-card border border-alien-border rounded-lg
+           relative overflow-hidden;
+  }
+  .label-alien {
+    @apply block text-xs font-orbitron text-alien-muted uppercase tracking-widest mb-1.5;
+  }
+  .error-text {
+    @apply text-red-400 text-xs mt-1 font-rajdhani;
+  }
+  .neon-text {
+    @apply text-alien-green;
+    text-shadow: 0 0 10px rgba(0,255,136,0.5);
+  }
+  .neon-border {
+    border-color: #00FF88;
+    box-shadow: 0 0 10px rgba(0,255,136,0.2), inset 0 0 10px rgba(0,255,136,0.05);
+  }
+}
+
+/* Animação de entrada dos cards */
+@keyframes alienFadeIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.alien-card-enter {
+  animation: alienFadeIn 0.4s ease-out forwards;
+}
+
+/* Scan line nos cards */
+@keyframes scanLine {
+  0%   { top: -10%; opacity: 0.6; }
+  100% { top: 110%; opacity: 0; }
+}
+.scan-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00FF88, transparent);
+  animation: scanLine 3s linear infinite;
+  pointer-events: none;
+}
+
+/* Pulso no preço */
+@keyframes pricePulse {
+  0%, 100% { text-shadow: 0 0 8px rgba(0,255,136,0.4); }
+  50%       { text-shadow: 0 0 20px rgba(0,255,136,0.9); }
+}
+.price-pulse {
+  animation: pricePulse 2s ease-in-out infinite;
+}
+
+/* Modal entrada */
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-enter {
+  animation: modalIn 0.25s ease-out;
+}

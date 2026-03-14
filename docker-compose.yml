@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: ./docker/php
+    container_name: aliens_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./backend:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - aliens_network
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:alpine
+    container_name: aliens_nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - aliens_network
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: aliens_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: aliens_store
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: aliens_user
+      MYSQL_PASSWORD: aliens_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - aliens_dbdata:/var/lib/mysql
+    networks:
+      - aliens_network
+
+  frontend:
+    build:
+      context: ./docker/node
+    container_name: aliens_frontend
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host"
+    networks:
+      - aliens_network
+
+networks:
+  aliens_network:
+    driver: bridge
+
+volumes:
+  aliens_dbdata:
