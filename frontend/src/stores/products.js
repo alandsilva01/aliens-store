@@ -36,14 +36,27 @@ export const useProductStore = defineStore('products', () => {
   }
 
   async function updateProduct(id, formData) {
-    // Laravel 11 nao suporta _method em multipart
-    // Enviamos como POST com X-HTTP-Method-Override header
-    const { data } = await api.post(`/products/${id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'X-HTTP-Method-Override': 'PUT',
-      },
-    })
+    // Step 1: update product data as JSON
+    const jsonData = {
+      title:       formData.get('title'),
+      description: formData.get('description'),
+      sale_price:  formData.get('sale_price'),
+      cost_price:  formData.get('cost_price'),
+      category:    formData.get('category'),
+    }
+    await api.put(`/products/${id}/data`, jsonData)
+
+    // Step 2: upload new images if any
+    const images = formData.getAll('images[]')
+    if (images.length > 0 && images[0].size > 0) {
+      const imgFormData = new FormData()
+      images.forEach(img => imgFormData.append('images[]', img))
+      await api.post(`/products/${id}/images`, imgFormData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+    }
+
+    const { data } = await api.get(`/products/${id}`)
     return data
   }
 

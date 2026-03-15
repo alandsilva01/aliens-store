@@ -15,31 +15,17 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = Product::with(['images', 'creator']);
-
-        if ($request->filled('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%');
-        }
-
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
-        }
-
-        if ($request->filled('active')) {
-            $query->where('is_active', $request->boolean('active'));
-        }
-
+        if ($request->filled('search'))   $query->where('title', 'like', '%'.$request->search.'%');
+        if ($request->filled('category')) $query->where('category', $request->category);
+        if ($request->filled('active'))   $query->where('is_active', $request->boolean('active'));
         return response()->json($query->latest()->paginate(12));
     }
 
     public function categories()
     {
-        $categories = Product::whereNotNull('category')
-            ->distinct()
-            ->pluck('category')
-            ->sort()
-            ->values();
-
-        return response()->json($categories);
+        return response()->json(
+            Product::whereNotNull('category')->distinct()->pluck('category')->sort()->values()
+        );
     }
 
     public function store(StoreProductRequest $request)
@@ -55,10 +41,8 @@ class ProductController extends Controller
                 'created_by'  => auth()->id(),
                 'updated_by'  => auth()->id(),
             ]);
-
             $this->handleImages($request, $product);
             $this->log($product, 'created', []);
-
             return response()->json($product->load('images'), 201);
         });
     }
@@ -68,11 +52,11 @@ class ProductController extends Controller
         return response()->json($product->load(['images', 'logs.user']));
     }
 
-    public function update(UpdateProductRequest $request, Product $product)
+    // PUT /products/{id}/data - update data only (JSON)
+    public function updateData(UpdateProductRequest $request, Product $product)
     {
         return DB::transaction(function () use ($request, $product) {
-            $before = $product->only(['title', 'description', 'sale_price', 'cost_price', 'category', 'is_active']);
-
+            $before = $product->only(['title','description','sale_price','cost_price','category']);
             $product->update([
                 'title'       => $request->title,
                 'description' => $request->description,
@@ -81,27 +65,29 @@ class ProductController extends Controller
                 'category'    => $request->category,
                 'updated_by'  => auth()->id(),
             ]);
-
-            $this->handleImages($request, $product);
-
-            $after   = $product->fresh()->only(['title', 'description', 'sale_price', 'cost_price', 'category', 'is_active']);
+            $after   = $product->fresh()->only(['title','description','sale_price','cost_price','category']);
             $changes = array_diff_assoc($after, $before);
             $this->log($product, 'updated', $changes);
-
             return response()->json($product->load('images'));
         });
     }
 
+    // POST /products/{id}/images - upload images only
+    public function uploadImages(Request $request, Product $product)
+    {
+        $request->validate([
+            'images'   => 'required|array|max:10',
+            'images.*' => 'file|mimes:jpg,jpeg,png|max:5120',
+        ]);
+        $this->handleImages($request, $product);
+        return response()->json($product->load('images'));
+    }
+
     public function toggleActive(Product $product)
     {
-        $product->update([
-            'is_active'  => !$product->is_active,
-            'updated_by' => auth()->id(),
-        ]);
-
+        $product->update(['is_active' => !$product->is_active, 'updated_by' => auth()->id()]);
         $action = $product->is_active ? 'activated' : 'inactivated';
         $this->log($product, $action, ['is_active' => $product->is_active]);
-
         return response()->json($product);
     }
 
@@ -109,7 +95,7 @@ class ProductController extends Controller
     {
         $this->log($product, 'deleted', []);
         $product->delete();
-        return response()->json(['message' => 'Produto removido com sucesso.']);
+        return response()->json(['message' => 'Produto removido.']);
     }
 
     public function removeImage(Product $product, ProductImage $image)
@@ -123,13 +109,9 @@ class ProductController extends Controller
     private function handleImages(Request $request, Product $product): void
     {
         if (!$request->hasFile('images')) return;
-
         foreach ($request->file('images') as $file) {
             $path = $file->store('products', 'public');
-            $product->images()->create([
-                'path'          => $path,
-                'original_name' => $file->getClientOriginalName(),
-            ]);
+            $product->images()->create(['path' => $path, 'original_name' => $file->getClientOriginalName()]);
         }
     }
 
